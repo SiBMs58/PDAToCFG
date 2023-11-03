@@ -29,6 +29,9 @@ public:
     void setT(const vector<string> &t);
     void setS(const string &s);
     void setP(const vector<pair<string, vector<string>>> &p);
+
+    // Getters
+    const vector<string> &getV() const;
 };
 
 
