@@ -81,13 +81,13 @@ void CFG::print() {
     // P, Productions
     cout << "P = {" << endl;
     for (int i = 0; i < P.size(); ++i) {
+        cout << "    " << P[i].first << "   -> `";
         for (int j = 0; j <  P[i].second.size(); ++j) {
-            cout << "    " << P[i].first << "   -> `";
-            if (P[i].second.size() == 0) {
+            cout << P[i].second[j];
+            if (j == P[i].second.size()-1) {
                 cout << "`" << endl;
             } else {
-                cout << P[i].second[j]<< "`" ;
-                cout << endl;
+                cout << " ";
             }
         }
     }
