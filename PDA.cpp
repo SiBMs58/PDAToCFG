@@ -77,8 +77,7 @@ CFG PDA::toCFG() {
     VCFG.push_back("S");
     for (int i = 0; i < Q.size(); i++) {
         for (int j = 0; j < Stack.size(); ++j) {
-            VCFG.push_back("["+Q[i]+"," + Stack[j]+"," + Q[i]+"]");
-            for (int k = Q.size()-1; k > 0; --k) {
+            for (int k = 0; k < Q.size(); ++k) {
                 VCFG.push_back("["+Q[i]+"," + Stack[j]+"," + Q[k]+"]");
             }
         }
@@ -112,7 +111,7 @@ CFG PDA::toCFG() {
 
         if (!T[i].stack_replacement_actions.empty()) {
             for (int j = 0; j < Q.size(); ++j) {
-                string newHead = head + Q[j] + "]";
+                string newHead = head + Q[j] + "] ";
                 if (T[i].stack_replacement_actions.size() == 1) {
                     replacementsForHead.push_back("["+T[i].to_state+","+T[i].stack_replacement_actions[0]+","+Q[j]+"]");
                     PCFG.push_back(make_pair(newHead, replacementsForHead));
@@ -120,8 +119,9 @@ CFG PDA::toCFG() {
                     replacementsForHead.push_back(T[i].input_symbol);
                 } else {
                     for (int k = 0; k < T[i].stack_replacement_actions.size(); ++k) {
-                        replacementsForHead.push_back("["+T[i].to_state+","+T[i].stack_replacement_actions[k]+","+Q[k]+"]");
-                        replacementsForHead.push_back("["+Q[k]+","+T[i].stack_replacement_actions[k]+","+Q[j]+"]");
+                        replacementsForHead.push_back("["+T[i].to_state+","+T[i].stack_replacement_actions[0]+","+Q[k]+"]");
+                        int nextIndex = (k + 1) % T[i].stack_replacement_actions.size();
+                        replacementsForHead.push_back("[" + Q[k] + "," + T[i].stack_replacement_actions[1] + "," + Q[j] + "]");
                         PCFG.push_back(make_pair(newHead, replacementsForHead));
                         replacementsForHead.clear();
                         replacementsForHead.push_back(T[i].input_symbol);
@@ -129,7 +129,7 @@ CFG PDA::toCFG() {
                 }
             }
         } else {
-            head += T[i].to_state + "]";
+            head += T[i].to_state + "] ";
             PCFG.push_back(make_pair(head, replacementsForHead));
         }
 
