@@ -120,7 +120,6 @@ CFG PDA::toCFG() {
                 } else {
                     for (int k = 0; k < T[i].stack_replacement_actions.size(); ++k) {
                         replacementsForHead.push_back("["+T[i].to_state+","+T[i].stack_replacement_actions[0]+","+Q[k]+"]");
-                        int nextIndex = (k + 1) % T[i].stack_replacement_actions.size();
                         replacementsForHead.push_back("[" + Q[k] + "," + T[i].stack_replacement_actions[1] + "," + Q[j] + "]");
                         PCFG.push_back(make_pair(newHead, replacementsForHead));
                         replacementsForHead.clear();
@@ -134,17 +133,7 @@ CFG PDA::toCFG() {
         }
 
     }
-    // Step three of "the productions of the grammar G are as follows" p.251
-     /*for (int i = 0; i < T.size(); ++i) {
-        if (T[i].stack_replacement_actions.empty()) {
-            string head = "[" + T[i].from_state + "," + T[i].stack_symbol + "," + T[i].to_state + "]";
-            vector<string> replacementsForHead;
-            replacementsForHead.push_back(" ");
-            PCFG.push_back(make_pair(head, replacementsForHead));
-        }
-     }*/
 
     cfg.setP(PCFG);
-
     return cfg;
 }
