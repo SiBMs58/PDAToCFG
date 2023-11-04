@@ -101,9 +101,37 @@ CFG PDA::toCFG() {
     vector<string> replacementsForS;
     for (int i = 0; i < Q.size(); ++i) {
         replacementsForS.push_back("["+q0+",Z0,"+Q[i]+"]");
+        PCFG.push_back(make_pair("S", replacementsForS));
+        replacementsForS.clear();
     }
-    PCFG.push_back(make_pair("S", replacementsForS));
-    // TODO: Step two of "the productions of the grammar G are as follows" p.250
+    // Step two of "the productions of the grammar G are as follows" p.250
+    for (int i = 0; i < δ.size(); ++i) {
+        string head = "[" + δ[i].from_state + "," + δ[i].stack_symbol + ",";
+        vector<string> replacementsForHead;
+        replacementsForHead.push_back(δ[i].input_symbol);
+
+        if (!δ[i].stack_replacement_actions.empty()) {
+            int bodySize = δ[i].stack_replacement_actions.size();
+            int stateCount = Q.size();
+            // Generate the production [qZq] → i[qZq][qZq)
+            /*for (int j = 0; j < bodySize; ++j) {
+                for (int k = 0; k < stateCount; ++k) {
+                    string newhead = head + Q[j]+"]";
+                    replacementsForHead.push_back("["+δ[i].to_state+","+δ[i].stack_replacement_actions[j]+","+Q[j]+"]");
+                    PCFG.push_back(make_pair(newhead, replacementsForHead));
+                    replacementsForHead.pop_back();
+                }
+            }*/
+        } else {
+            head += δ[i].to_state + "]";
+        }
+
+        // Add the generated productions to the PCFG
+        PCFG.push_back(make_pair(head, replacementsForHead));
+        replacementsForHead.clear();
+    }
+
+
 
     cfg.setP(PCFG);
 
