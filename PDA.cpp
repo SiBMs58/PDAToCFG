@@ -111,28 +111,41 @@ CFG PDA::toCFG() {
         replacementsForHead.push_back(δ[i].input_symbol);
 
         if (!δ[i].stack_replacement_actions.empty()) {
-            int bodySize = δ[i].stack_replacement_actions.size();
-            int stateCount = Q.size();
-            // Generate the production [qZq] → i[qZq][qZq)
-            /*for (int j = 0; j < bodySize; ++j) {
-                for (int k = 0; k < stateCount; ++k) {
-                    string newhead = head + Q[j]+"]";
-                    replacementsForHead.push_back("["+δ[i].to_state+","+δ[i].stack_replacement_actions[j]+","+Q[j]+"]");
-                    PCFG.push_back(make_pair(newhead, replacementsForHead));
-                    replacementsForHead.pop_back();
+            for (int j = 0; j < Q.size(); ++j) {
+                string newHead = head + Q[j] + "]";
+                if (δ[i].stack_replacement_actions.size() == 1) {
+                    replacementsForHead.push_back("["+δ[i].to_state+","+δ[i].stack_replacement_actions[0]+","+Q[j]+"]");
+                    PCFG.push_back(make_pair(newHead, replacementsForHead));
+                    replacementsForHead.clear();
+                    replacementsForHead.push_back(δ[i].input_symbol);
+                } else {
+                    for (int k = 0; k < δ[i].stack_replacement_actions.size(); ++k) {
+                        replacementsForHead.push_back("["+δ[i].to_state+","+δ[i].stack_replacement_actions[k]+","+Q[k]+"]");
+                        replacementsForHead.push_back("["+Q[k]+","+δ[i].stack_replacement_actions[k]+","+Q[j]+"]");
+                        PCFG.push_back(make_pair(newHead, replacementsForHead));
+                        replacementsForHead.clear();
+                        replacementsForHead.push_back(δ[i].input_symbol);
+                    }
                 }
-            }*/
+            }
         } else {
             head += δ[i].to_state + "]";
+            PCFG.push_back(make_pair(head, replacementsForHead));
         }
 
-        // Add the generated productions to the PCFG
-        PCFG.push_back(make_pair(head, replacementsForHead));
-        replacementsForHead.clear();
     }
+    // Step three of "the productions of the grammar G are as follows" p.251
+     for (int i = 0; i < δ.size(); ++i) {
+        if (δ[i].stack_replacement_actions.empty()) {
+            string head = "[" + δ[i].from_state + "," + δ[i].stack_symbol + "," + δ[i].to_state + "]";
+            vector<string> replacementsForHead;
+            replacementsForHead.push_back(" ");
+            PCFG.push_back(make_pair(head, replacementsForHead));
+        }
+     }
 
 
-
+    sort(PCFG.begin(), PCFG.end());
     cfg.setP(PCFG);
 
     return cfg;
