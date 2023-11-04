@@ -6,7 +6,7 @@
 using namespace std;
 
 int main() {
-    PDA pda("../inputPDA2.json");
+    PDA pda("../inputPDA3.json");
     pda.toCFG().print();
     return 0;
 }
