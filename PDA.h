@@ -23,9 +23,9 @@ struct PDATransition {
 class PDA {
 private:
     vector<string> Q; // Set of states
-    vector<string> Σ; // Set of input symbols
-    vector<string> Γ; // Set of stack symbols
-    vector<PDATransition> δ; // Set of transitions
+    vector<string> A; // Set of input symbols
+    vector<string> Stack; // Set of stack symbols
+    vector<PDATransition> T; // Set of transitions
     string q0; // Start state
     string Z0; // Start stack symbol
     vector<string> F; // Set of final states

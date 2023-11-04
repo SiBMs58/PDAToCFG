@@ -29,14 +29,14 @@ PDA::PDA(const std::string &filename) {
     for (const auto& inputSymbol : j["Alphabet"]) {
         inputSymbolsPDA.push_back(inputSymbol);
     }
-    Σ = inputSymbolsPDA;
+    A = inputSymbolsPDA;
 
     // Access the elements of the "Stack symbols" array
     vector<string> stackSymbolsPDA;
     for (const auto& stackSymbol : j["StackAlphabet"]) {
         stackSymbolsPDA.push_back(stackSymbol);
     }
-    Γ = stackSymbolsPDA;
+    Stack = stackSymbolsPDA;
 
     // Access the elements of the "Transitions" array
     vector<PDATransition> transitionsPDA;
@@ -51,7 +51,7 @@ PDA::PDA(const std::string &filename) {
         }
         transitionsPDA.push_back(newTransition);
     }
-    δ = transitionsPDA;
+    T = transitionsPDA;
 
     // Access the elements of the "Start state" array
     string startStatePDA;
@@ -76,10 +76,10 @@ CFG PDA::toCFG() {
     vector<string> VCFG;
     VCFG.push_back("S");
     for (int i = 0; i < Q.size(); i++) {
-        for (int j = 0; j < Γ.size(); ++j) {
-            VCFG.push_back("["+Q[i]+"," + Γ[j]+"," + Q[i]+"]");
+        for (int j = 0; j < Stack.size(); ++j) {
+            VCFG.push_back("["+Q[i]+"," + Stack[j]+"," + Q[i]+"]");
             for (int k = Q.size()-1; k > 0; --k) {
-                VCFG.push_back("["+Q[i]+"," + Γ[j]+"," + Q[k]+"]");
+                VCFG.push_back("["+Q[i]+"," + Stack[j]+"," + Q[k]+"]");
             }
         }
     }
@@ -87,8 +87,8 @@ CFG PDA::toCFG() {
 
     // T, Set of terminals
     vector<string> TCFG;
-    for (int i = 0; i < Σ.size(); ++i) {
-        TCFG.push_back(Σ[i]);
+    for (int i = 0; i < A.size(); ++i) {
+        TCFG.push_back(A[i]);
     }
     cfg.setT(TCFG);
 
@@ -105,47 +105,45 @@ CFG PDA::toCFG() {
         replacementsForS.clear();
     }
     // Step two of "the productions of the grammar G are as follows" p.250
-    for (int i = 0; i < δ.size(); ++i) {
-        string head = "[" + δ[i].from_state + "," + δ[i].stack_symbol + ",";
+    for (int i = 0; i < T.size(); ++i) {
+        string head = "[" + T[i].from_state + "," + T[i].stack_symbol + ",";
         vector<string> replacementsForHead;
-        replacementsForHead.push_back(δ[i].input_symbol);
+        replacementsForHead.push_back(T[i].input_symbol);
 
-        if (!δ[i].stack_replacement_actions.empty()) {
+        if (!T[i].stack_replacement_actions.empty()) {
             for (int j = 0; j < Q.size(); ++j) {
                 string newHead = head + Q[j] + "]";
-                if (δ[i].stack_replacement_actions.size() == 1) {
-                    replacementsForHead.push_back("["+δ[i].to_state+","+δ[i].stack_replacement_actions[0]+","+Q[j]+"]");
+                if (T[i].stack_replacement_actions.size() == 1) {
+                    replacementsForHead.push_back("["+T[i].to_state+","+T[i].stack_replacement_actions[0]+","+Q[j]+"]");
                     PCFG.push_back(make_pair(newHead, replacementsForHead));
                     replacementsForHead.clear();
-                    replacementsForHead.push_back(δ[i].input_symbol);
+                    replacementsForHead.push_back(T[i].input_symbol);
                 } else {
-                    for (int k = 0; k < δ[i].stack_replacement_actions.size(); ++k) {
-                        replacementsForHead.push_back("["+δ[i].to_state+","+δ[i].stack_replacement_actions[k]+","+Q[k]+"]");
-                        replacementsForHead.push_back("["+Q[k]+","+δ[i].stack_replacement_actions[k]+","+Q[j]+"]");
+                    for (int k = 0; k < T[i].stack_replacement_actions.size(); ++k) {
+                        replacementsForHead.push_back("["+T[i].to_state+","+T[i].stack_replacement_actions[k]+","+Q[k]+"]");
+                        replacementsForHead.push_back("["+Q[k]+","+T[i].stack_replacement_actions[k]+","+Q[j]+"]");
                         PCFG.push_back(make_pair(newHead, replacementsForHead));
                         replacementsForHead.clear();
-                        replacementsForHead.push_back(δ[i].input_symbol);
+                        replacementsForHead.push_back(T[i].input_symbol);
                     }
                 }
             }
         } else {
-            head += δ[i].to_state + "]";
+            head += T[i].to_state + "]";
             PCFG.push_back(make_pair(head, replacementsForHead));
         }
 
     }
     // Step three of "the productions of the grammar G are as follows" p.251
-     for (int i = 0; i < δ.size(); ++i) {
-        if (δ[i].stack_replacement_actions.empty()) {
-            string head = "[" + δ[i].from_state + "," + δ[i].stack_symbol + "," + δ[i].to_state + "]";
+     /*for (int i = 0; i < T.size(); ++i) {
+        if (T[i].stack_replacement_actions.empty()) {
+            string head = "[" + T[i].from_state + "," + T[i].stack_symbol + "," + T[i].to_state + "]";
             vector<string> replacementsForHead;
             replacementsForHead.push_back(" ");
             PCFG.push_back(make_pair(head, replacementsForHead));
         }
-     }
+     }*/
 
-
-    sort(PCFG.begin(), PCFG.end());
     cfg.setP(PCFG);
 
     return cfg;

@@ -113,6 +113,7 @@ void CFG::setS(const string &s) {
 
 void CFG::setP(const vector<pair<string, vector<string>>> &p) {
     P = p;
+    sort(P.begin(), P.end());
 }
 
 // Getters
